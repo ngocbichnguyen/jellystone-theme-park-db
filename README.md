@@ -105,8 +105,7 @@ This project delivers a full-cycle data modeling solution, including:
 
 ## 📬 Contact
 
-Project by **Ngoc Bich Nguyen**  
-_Student ID: 47972491_  
-For feedback or suggestions, please open an [Issue](https://github.com/your-username/jellystone-theme-park-db/issues).
+Project by **Jade Nguyen**  
+Email: ngngocbich166@gmail.com
 
 ---
