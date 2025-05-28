@@ -1,0 +1,159 @@
+-- --------------------------------------------
+-- 🎢 Jellystone Theme Park - Physical Schema
+-- Target: MySQL 8.x
+-- --------------------------------------------
+
+-- AREA
+CREATE TABLE Area (
+    AreaID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    Location VARCHAR(255),
+    Facilities TEXT,
+    Size DECIMAL(10,2) -- e.g., in square meters
+);
+
+-- EXPERIENCE TYPE
+CREATE TABLE ExperienceType (
+    TypeID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL
+);
+
+-- VENUE
+CREATE TABLE Venue (
+    VenueID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    Location VARCHAR(255),
+    AreaID INT,
+    FOREIGN KEY (AreaID) REFERENCES Area(AreaID)
+);
+
+-- EXPERIENCE
+CREATE TABLE Experience (
+    ExperienceID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    Capacity INT,
+    TypeID INT,
+    VenueID INT,
+    AreaID INT,
+    FOREIGN KEY (TypeID) REFERENCES ExperienceType(TypeID),
+    FOREIGN KEY (VenueID) REFERENCES Venue(VenueID),
+    FOREIGN KEY (AreaID) REFERENCES Area(AreaID)
+);
+
+-- TICKET CLASS
+CREATE TABLE TicketClass (
+    TicketClassID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(50) NOT NULL,
+    Description TEXT,
+    Price DECIMAL(10,2) NOT NULL
+);
+
+-- MEMBER
+CREATE TABLE Member (
+    MemberID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(100),
+    LastName VARCHAR(100),
+    Email VARCHAR(255) UNIQUE,
+    DOB DATE,
+    State VARCHAR(100),
+    Country VARCHAR(100)
+);
+
+-- MEMBER PURCHASE HISTORY
+CREATE TABLE MemberPurchaseHistory (
+    MemberID INT,
+    PurchaseDate DATETIME,
+    TicketClassID INT,
+    PointsGained INT,
+    PRIMARY KEY (MemberID, PurchaseDate),
+    FOREIGN KEY (MemberID) REFERENCES Member(MemberID),
+    FOREIGN KEY (TicketClassID) REFERENCES TicketClass(TicketClassID)
+);
+
+-- ROLE TYPE
+CREATE TABLE RoleType (
+    RoleTypeID INT PRIMARY KEY AUTO_INCREMENT,
+    Description VARCHAR(100),
+    BasePayRate DECIMAL(10,2) -- per hour
+);
+
+-- SENIORITY LEVEL
+CREATE TABLE SeniorityLevel (
+    SeniorityLevelID INT PRIMARY KEY AUTO_INCREMENT,
+    LevelDescription VARCHAR(100),
+    PayLoadingPercentage DECIMAL(5,2)
+);
+
+-- PERSONNEL
+CREATE TABLE Personnel (
+    PersonnelID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(100),
+    LastName VARCHAR(100),
+    Mobile VARCHAR(20),
+    Email VARCHAR(255),
+    DOB DATE,
+    SupervisorID INT,
+    FOREIGN KEY (SupervisorID) REFERENCES Personnel(PersonnelID)
+);
+
+-- ROLE ALLOCATION
+CREATE TABLE RoleAllocation (
+    PersonnelID INT,
+    RoleTypeID INT,
+    SeniorityLevelID INT,
+    PRIMARY KEY (PersonnelID, RoleTypeID, SeniorityLevelID),
+    FOREIGN KEY (PersonnelID) REFERENCES Personnel(PersonnelID),
+    FOREIGN KEY (RoleTypeID) REFERENCES RoleType(RoleTypeID),
+    FOREIGN KEY (SeniorityLevelID) REFERENCES SeniorityLevel(SeniorityLevelID)
+);
+
+-- ROSTER
+CREATE TABLE Roster (
+    RosterID INT PRIMARY KEY AUTO_INCREMENT,
+    PersonnelID INT,
+    ExperienceID INT,
+    RoleTypeID INT,
+    SeniorityLevelID INT,
+    RosterDate DATE,
+    StartTime TIME,
+    DurationHours DECIMAL(4,2),
+    FOREIGN KEY (PersonnelID) REFERENCES Personnel(PersonnelID),
+    FOREIGN KEY (ExperienceID) REFERENCES Experience(ExperienceID),
+    FOREIGN KEY (RoleTypeID) REFERENCES RoleType(RoleTypeID),
+    FOREIGN KEY (SeniorityLevelID) REFERENCES SeniorityLevel(SeniorityLevelID)
+);
+
+-- CURATED VISIT
+CREATE TABLE CuratedVisit (
+    VisitID INT PRIMARY KEY AUTO_INCREMENT,
+    Title VARCHAR(100),
+    Description TEXT,
+    AgeGroup VARCHAR(50),
+    ThrillLevel VARCHAR(50),
+    StartExperienceID INT,
+    EndExperienceID INT,
+    FOREIGN KEY (StartExperienceID) REFERENCES Experience(ExperienceID),
+    FOREIGN KEY (EndExperienceID) REFERENCES Experience(ExperienceID)
+);
+
+-- CURATED VISIT INTERMEDIATE EXPERIENCES
+CREATE TABLE CuratedVisitExperience (
+    VisitID INT,
+    ExperienceID INT,
+    SequenceNumber INT,
+    PRIMARY KEY (VisitID, SequenceNumber),
+    FOREIGN KEY (VisitID) REFERENCES CuratedVisit(VisitID),
+    FOREIGN KEY (ExperienceID) REFERENCES Experience(ExperienceID)
+);
+
+-- MAINTENANCE SCHEDULE
+CREATE TABLE Maintenance (
+    MaintenanceID INT PRIMARY KEY AUTO_INCREMENT,
+    ExperienceID INT,
+    Description TEXT,
+    StartDate DATE,
+    Status VARCHAR(50),
+    ContactPersonnelID INT,
+    FOREIGN KEY (ExperienceID) REFERENCES Experience(ExperienceID),
+    FOREIGN KEY (ContactPersonnelID) REFERENCES Personnel(PersonnelID)
+);
